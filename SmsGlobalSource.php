@@ -114,7 +114,7 @@ class SmsGlobalSource extends DataSource {
      * Generic function to allow any SMS Global API call
      * @params
      *  string $type - The name within the wsdl to call
-     *  array $params - Parameters to pass according to wsdl
+     *  mixed $params - Parameters to pass according to wsdl
      * @return mixed
      */
     public function query($type = null, $params = array()) 
@@ -127,7 +127,7 @@ class SmsGlobalSource extends DataSource {
             return $this->sendSms($params);
             break;
         case 'checkBalance' :
-            return $this->checkBalance($params);
+            return $this->checkBalance($params); //Should be a string
             break;
         case 'getError' :
             return $this->getError();
@@ -149,13 +149,16 @@ class SmsGlobalSource extends DataSource {
 
     /**
      * Sends an SMS via $this->query();
-     * @params
-     *  array $params
-     *  string $schedule
+     * @param array $params
      * @return mixed
      */
-    public function sendSms($params = array(), $schedule = '0') 
+    public function sendSms($params = array()) 
     {
+        $schedule = 0;
+        if (isset($params['schedule'])) {
+            $schedule = $params['schedule'];
+            unset($params['schedule']);
+        }
         //Add in the default params required by the API
         $requiredParams = array(
             'ticket' => $this->ticketId,
