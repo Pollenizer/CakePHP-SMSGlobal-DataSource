@@ -10,7 +10,7 @@ Copy SmsGlobalSource.php into the app/Model/Datasource directory.
 CONFIGURATION
 -------------
 
-Within boostrap.php add:
+Within database.php add:
 
 	public $smsGlobal = array(
 		'datasource' => 'SmsGlobalSource',
@@ -45,7 +45,7 @@ $data = array(
 );
 $this->Model->sendSms($data);
 
-If a response is FALSE make a call to $this->Model->getError(); incase an error has occurred.
+If a response is FALSE make a call to $this->Model->getError(); an error may exist.
 
 NOTE
 -------------
