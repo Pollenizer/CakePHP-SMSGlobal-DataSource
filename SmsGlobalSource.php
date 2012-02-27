@@ -175,11 +175,11 @@ class SmsGlobalSource extends DataSource {
      * @param string $iso - The country code to check for
      * @return mixed
      */
-    public function checkBalance($iso = 'AU') 
+    public function checkBalance($iso) 
     {
         $params = array(
             'ticket' => $this->ticketId,
-            'iso_country' => $iso,
+            'iso_country' => !empty($iso) ? $iso : 'AU',
         );
         return $this->query('apiBalanceCheck', $params);
     }
