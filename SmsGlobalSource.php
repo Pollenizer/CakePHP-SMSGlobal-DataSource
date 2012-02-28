@@ -124,7 +124,7 @@ class SmsGlobalSource extends DataSource {
             return $this->getTicketId();
             break;
         case 'sendSms' :
-            return $this->sendSms($params);
+            return $this->sendSms(array_pop($params));
             break;
         case 'checkBalance' :
             return $this->checkBalance($params); //Should be a string
@@ -140,7 +140,12 @@ class SmsGlobalSource extends DataSource {
 
         try {
             $result = $this->soapClient->__call($type, $params);
-            return $this->_xmlResponse($result);
+            $response = $this->_xmlResponse($result);
+            if (!empty($response['resp']['@err'])) {
+                $this->setError($response['resp']['@err']);
+                return false;
+            }
+            return $response;
         } catch (SoapFault $exception) {
             $this->setError($exception->faultstring);
             return false;
@@ -149,24 +154,21 @@ class SmsGlobalSource extends DataSource {
 
     /**
      * Sends an SMS via $this->query();
-     * @param array $params
+     * @param array $addParams
      * @return mixed
      */
-    public function sendSms($params = array()) 
+    public function sendSms($addParams) 
     {
-        $schedule = 0;
-        if (isset($params['schedule'])) {
-            $schedule = $params['schedule'];
-            unset($params['schedule']);
-        }
-        //Add in the default params required by the API
-        $requiredParams = array(
+        //Key order matters, @err may be thrown if out of order
+        $params = array(
             'ticket' => $this->ticketId,
+            'sms_from' => isset($addParams['sms_from']) ? $addParams['sms_from'] : null,
+            'sms_to' => isset($addParams['sms_to']) ? $addParams['sms_to'] : null,
+            'msg_content' => isset($addParams['msg_content']) ? $addParams['msg_content'] : null,
+            'msg_type' => 'text', //Depricated, should always be text
             'unicode' => 0, //Depricated, should always be 0
-            'msg_type' => 'text',
-            'schedule' => $schedule,
+            'schedule' => isset($addParams['schedule']) ? $addParams['schedule'] : 0,
         );
-        $params = array_merge($params, $requiredParams);
         return $this->query('apiSendSms', $params);
     }
 
@@ -179,7 +181,7 @@ class SmsGlobalSource extends DataSource {
     {
         $params = array(
             'ticket' => $this->ticketId,
-            'iso_country' => !empty($iso) ? $iso : 'AU',
+            'iso_country' => !empty($iso) ? array_pop($iso) : 'AU',
         );
         return $this->query('apiBalanceCheck', $params);
     }

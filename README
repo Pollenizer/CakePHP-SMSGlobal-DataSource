@@ -15,7 +15,7 @@ Within database.php add:
 	public $smsGlobal = array(
 		'datasource' => 'SmsGlobalSource',
 		'user' => 'USERNAME',
-		'password => 'PASSWORD',
+		'password' => 'PASSWORD',
 	);
 
 Within your Model add:
@@ -40,7 +40,7 @@ $this->Model->checkBalance('US'); //The param here is the ISO to check your cred
 
 $data = array(
 	'sms_from' => 'Fred',
-	'sms_to' => '+614xxxxxxxx', //International format
+	'sms_to' => '614xxxxxxxx', //International format, without the '+'
 	'msg_content' => 'Hello World',
 );
 $this->Model->sendSms($data);
@@ -52,3 +52,5 @@ NOTE
 Refer to the documentation and wsdl as to what parameters are required per call.
 http://www.smsglobal.com/docs/SOAP.pdf
 http://www.smsglobal.com/mobileworks/soapserver.php?wsdl
+
+Ordering matters! If key's are out of order error codes will be thrown from SMS Global.
